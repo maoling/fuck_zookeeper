@@ -80,7 +80,11 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
     @Override
     public void configure(InetSocketAddress addr, int maxcc) throws IOException {
         configureSaslLogin();
-
+        /**
+         * thread是ServerCnxnFactory的主线程先启动；然后再启动NIO服务器
+         * @see ServerCnxnFactory#run也已经被执行了
+         * 此时客户端可以访问zk的2181端口；但是还无法处理客户端的请求
+         */
         thread = new ZooKeeperThread(this, "NIOServerCxn.Factory:" + addr);
         thread.setDaemon(true);
         maxClientCnxns = maxcc;
@@ -88,6 +92,7 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
         ss.socket().setReuseAddress(true);
         LOG.info("binding to port " + addr);
         ss.socket().bind(addr);
+        //非阻塞
         ss.configureBlocking(false);
         ss.register(selector, SelectionKey.OP_ACCEPT);
     }
@@ -118,6 +123,7 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
             InterruptedException {
         start();
         setZooKeeperServer(zks);
+        //恢复本地数据
         zks.startdata();
         zks.startup();
     }
@@ -169,7 +175,7 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
             return s.size();
         }
     }
-
+    //主逻辑
     public void run() {
         while (!ss.socket().isClosed()) {
             try {

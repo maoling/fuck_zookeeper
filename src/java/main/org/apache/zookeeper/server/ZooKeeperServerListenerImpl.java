@@ -39,6 +39,7 @@ class ZooKeeperServerListenerImpl implements ZooKeeperServerListener {
 
     @Override
     public void notifyStopping(String threadName, int exitCode) {
+    	//正确而又优雅的打日志的写法
         LOG.info("Thread {} exits, error code {}", threadName, exitCode);
         zkServer.setState(State.ERROR);
     }

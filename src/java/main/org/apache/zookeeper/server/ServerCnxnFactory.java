@@ -38,6 +38,9 @@ import org.apache.zookeeper.server.auth.SaslServerCallbackHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * zk服务端网络连接工厂
+ */
 public abstract class ServerCnxnFactory {
 
     public static final String ZOOKEEPER_SERVER_CNXN_FACTORY = "zookeeper.serverCnxnFactory";
@@ -100,14 +103,19 @@ public abstract class ServerCnxnFactory {
 
     public abstract void closeAll();
     
+    /**
+     * since 3.4.0,引入Netty;可以通过配置文件的zookeeper.serverCnxnFactory选项选择用
+     * zk自己实现的NIO;还是使用Netty框架
+     */
     static public ServerCnxnFactory createFactory() throws IOException {
-        //到底从什么位置得到的类的全路径包名？？
+        	
     	String serverCnxnFactoryName =
             System.getProperty(ZOOKEEPER_SERVER_CNXN_FACTORY);
         if (serverCnxnFactoryName == null) {
             serverCnxnFactoryName = NIOServerCnxnFactory.class.getName();
         }
         try {
+        	//得到类的全路径包名;通过类加载,反射的方式简洁的实现简单工厂模式;而避免if,else判断的方式
             return (ServerCnxnFactory) Class.forName(serverCnxnFactoryName)
                                                 .newInstance();
         } catch (Exception e) {

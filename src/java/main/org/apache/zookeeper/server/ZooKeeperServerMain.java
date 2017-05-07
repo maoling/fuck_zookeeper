@@ -76,7 +76,7 @@ public class ZooKeeperServerMain {
         } catch (JMException e) {
             LOG.warn("Unable to register log4j JMX control", e);
         }
-
+        //再次解析配置文件(我也是醉了呀，又解析一遍!!!)
         ServerConfig config = new ServerConfig();
         if (args.length == 1) {
             config.parse(args[0]);
@@ -101,6 +101,9 @@ public class ZooKeeperServerMain {
             // so rather than spawning(?) another thread, we will just call
             // run() in this thread.
             // create a file logger url from the command line args
+        	/**
+        	 * 创建zkServer对象时，同时加载ServerStats
+        	 */
             final ZooKeeperServer zkServer = new ZooKeeperServer();
             // Registers shutdown handler which will be used to know the
             // server error or shutdown state changes.
@@ -115,12 +118,16 @@ public class ZooKeeperServerMain {
             zkServer.setMinSessionTimeout(config.minSessionTimeout);
             zkServer.setMaxSessionTimeout(config.maxSessionTimeout);
             cnxnFactory = ServerCnxnFactory.createFactory();
+            //configure()会初始化cnxnFactory
             cnxnFactory.configure(config.getClientPortAddress(),
                     config.getMaxClientCnxns());
+            
             cnxnFactory.startup(zkServer);
+            //此时注册了cnxnFactory,zk服务器初始化完毕,可以对外提供服务，接收客户端请求
             // Watch status of ZooKeeper server. It will do a graceful shutdown
             // if the server is not running or hits an internal error.
-            /**shutdownLatch 这个CountDownLatch用的神来之笔
+            /**
+             * shutdownLatch 这个CountDownLatch用的神来之笔
              * 只有当前zkServer的状态为Error时,才会调用CountDownLatch.countdown()
              * 越过127行,到达128行进行一系列的shutdown()行为
              * @see ZooKeeperServerShutdownHandler#handle

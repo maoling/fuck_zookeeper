@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * 上层服务器和下层数据存储的对接层，实现一系列操作文件的接口
  * This is a helper class 
  * above the implementations 
  * of txnlog and snapshot 

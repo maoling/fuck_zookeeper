@@ -82,7 +82,8 @@ public class FinalRequestProcessor implements RequestProcessor {
     public FinalRequestProcessor(ZooKeeperServer zks) {
         this.zks = zks;
     }
-
+    
+    //shit,竟然300多行
     public void processRequest(Request request) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Processing request:: " + request);

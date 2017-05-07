@@ -70,8 +70,11 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * 单机版zk服务器最核心的类。首先是对zk服务器的创建，接着是
+ * 实例的初始化工作（包括连接器，内存数据库和请求处理器等组件的初始化工作）
  * This class implements a simple standalone ZooKeeperServer. It sets up the
  * following chain of RequestProcessors to process requests:
+ * 请求处理器的请求处理流程：
  * PrepRequestProcessor -> SyncRequestProcessor -> FinalRequestProcessor
  */
 public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
@@ -416,15 +419,27 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         if (sessionTracker == null) {
             createSessionTracker();
         }
+        /**
+         * 启动会话管理器（初始化expirationInterval,nextExpirationTime,
+         * sessionWithTimeout[用于保存每个会话的超时时间，同时还计算一个初始化的sessionID]）
+         */
         startSessionTracker();
+        /**
+         * 初始化zk请求处理链
+         */
         setupRequestProcessors();
-
+        /**
+         * 注册JMX
+         */
         registerJMX();
 
         setState(State.RUNNING);
         notifyAll();
     }
-
+    /**
+     * [责任链设计模式]将多个处理请求串联起来形成请求处理链
+     * Pre-->Sync-->Final [单机请求就这三种]
+     */
     protected void setupRequestProcessors() {
         RequestProcessor finalProcessor = new FinalRequestProcessor(this);
         RequestProcessor syncProcessor = new SyncRequestProcessor(this,

@@ -165,6 +165,7 @@ public class SyncRequestProcessor extends ZooKeeperCriticalThread implements Req
                         // iff this is a read, and there are no pending
                         // flushes (writes), then just pass this to the next
                         // processor
+                    	//请求传递
                         if (nextProcessor != null) {
                             nextProcessor.processRequest(si);
                             if (nextProcessor instanceof Flushable) {

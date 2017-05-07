@@ -105,20 +105,28 @@ public class QuorumPeerMain {
             config.parse(args[0]);
         }
         /**
-         * 启动安排清除任务
+         * 启动安排清除任务,定时清理历史数据(事务日志，以及快照数据)
+         * since3.4.0
          */
         // Start and schedule the the purge task
         DatadirCleanupManager purgeMgr = new DatadirCleanupManager(config
                 .getDataDir(), config.getDataLogDir(), config
                 .getSnapRetainCount(), config.getPurgeInterval());
         purgeMgr.start();
-
+        
+        /**
+         * 重要点
+         * 解析服务器配置地址列表,判断是集群，还是单机模式
+         */
+        // 集群分支
         if (args.length == 1 && config.servers.size() > 0) {
             runFromConfig(config);
         } else {
+        	// 单机分支,standalone(机器里的单身狗;我就是一个孤独患者，有何不可?)
             LOG.warn("Either no config or no quorum defined in config, running "
                     + " in standalone mode");
             // there is only server in the quorum -- run as standalone
+            //骚气的代码,太露骨了!
             ZooKeeperServerMain.main(args);
         }
     }

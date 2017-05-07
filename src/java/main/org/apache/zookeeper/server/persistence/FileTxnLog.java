@@ -170,7 +170,7 @@ public class FileTxnLog implements TxnLog {
         }
     }
 
-    /**
+    /**关闭所有打开的文件流
      * close all the open file handles
      * @throws IOException
      */
