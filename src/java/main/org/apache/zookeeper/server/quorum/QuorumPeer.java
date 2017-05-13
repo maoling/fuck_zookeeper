@@ -498,8 +498,15 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
     @Override
     public synchronized void start() {
         loadDataBase();
-        cnxnFactory.start();        
+        cnxnFactory.start(); 
+        /**
+         * 重要：开始leader选举
+         */
         startLeaderElection();
+        /**
+         * 启动本服务器实例线程，调用本地的run()方法
+           @see QuorumPeer.run()
+         */
         super.start();
     }
 
@@ -670,7 +677,9 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
         return new Observer(this, new ObserverZooKeeperServer(logFactory,
                 this, new ZooKeeperServer.BasicDataTreeBuilder(), this.zkDb));
     }
-
+    /**
+     * 从3.4.0就抛弃了0,1,2三种算法，只采用FastLeaderElection算法
+     */
     protected Election createElectionAlgorithm(int electionAlgorithm){
         Election le=null;
                 
@@ -686,6 +695,10 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
             le = new AuthFastLeaderElection(this, true);
             break;
         case 3:
+        	/**
+        	 * 创建Leader选举所需的网络I/O层 QuorumCnxManager,同时启动对
+        	 * leader选举端口进行监听
+        	 */
             qcm = new QuorumCnxManager(this);
             QuorumCnxManager.Listener listener = qcm.listener;
             if(listener != null){
@@ -696,6 +709,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
             }
             break;
         default:
+        	//骚气，断言只可能0,1,2,3
             assert false;
         }
         return le;
@@ -731,6 +745,9 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
         return null;
     }
 
+    /**
+     * II:终于找到你，还好我没有放弃!
+     */
     @Override
     public void run() {
         setName("QuorumPeer" + "[myid=" + getId() + "]" +

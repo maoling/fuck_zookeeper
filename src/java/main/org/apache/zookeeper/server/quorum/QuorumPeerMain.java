@@ -140,19 +140,28 @@ public class QuorumPeerMain {
   
       LOG.info("Starting quorum peer");
       try {
+    	  //创建ServerCnxnFactory
           ServerCnxnFactory cnxnFactory = ServerCnxnFactory.createFactory();
+          //初始化ServerCnxnFactory
           cnxnFactory.configure(config.getClientPortAddress(),
                                 config.getMaxClientCnxns());
-  
+          /**
+           * QuorumPeer是集群模式下特有的对象，是zk服务器的实例(ZooKeeperServer)的托管者
+           * QuorumPeer会不断监测当前服务器实例的运行状态,同时根据情况发起Leader选举
+           */
           quorumPeer = new QuorumPeer();
+          //注册一些核心组件到QuorumPeer中去，比如：CnxnFactory，FileTxnSnapLog，ZKDatabase
           quorumPeer.setClientPortAddress(config.getClientPortAddress());
           quorumPeer.setTxnFactory(new FileTxnSnapLog(
                       new File(config.getDataLogDir()),
                       new File(config.getDataDir())));
+          //设置服务器地址列表
           quorumPeer.setQuorumPeers(config.getServers());
+          //选举算法
           quorumPeer.setElectionType(config.getElectionAlg());
           quorumPeer.setMyid(config.getServerId());
           quorumPeer.setTickTime(config.getTickTime());
+          //会话超时时间
           quorumPeer.setMinSessionTimeout(config.getMinSessionTimeout());
           quorumPeer.setMaxSessionTimeout(config.getMaxSessionTimeout());
           quorumPeer.setInitLimit(config.getInitLimit());
@@ -163,8 +172,9 @@ public class QuorumPeerMain {
           quorumPeer.setLearnerType(config.getPeerType());
           quorumPeer.setSyncEnabled(config.getSyncEnabled());
           quorumPeer.setQuorumListenOnAllIPs(config.getQuorumListenOnAllIPs());
-  
+          //骚气的start()
           quorumPeer.start();
+          //在join之前quorumPeer的start()方法必须做完;
           quorumPeer.join();
       } catch (InterruptedException e) {
           // warn, but generally this is ok
