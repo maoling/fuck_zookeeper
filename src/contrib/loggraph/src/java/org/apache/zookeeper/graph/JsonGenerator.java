@@ -155,7 +155,9 @@ public class JsonGenerator {
 		    long zxid = Long.valueOf(m.group(2));
 		    int dst = e.getNode();
 		    long epoch2 = Long.valueOf(m.group(3));
-		    
+		    /**
+		     * 获取epoch(高三十二位),count(低三十二位)
+		     */
 		    int count = (int)zxid;// & 0xFFFFFFFFL;
 		    int epoch = (int)Long.rotateRight(zxid, 32);// >> 32;
 		    

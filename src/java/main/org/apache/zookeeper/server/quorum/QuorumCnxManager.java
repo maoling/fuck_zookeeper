@@ -470,7 +470,16 @@ public class QuorumCnxManager {
      *            Reference to socket
      */
     private void setSockOpts(Socket sock) throws SocketException {
-        sock.setTcpNoDelay(true);
+        /**
+         * 默认情况下发送数据是采用Negale算法。Negale算法是指发送方数据不会立刻发送出去，而是先放在缓冲区内，等待缓冲区满了，在发出去。Negale算法适用于需要发送大量数据的应用场景。这种算法减少传输的次数增加性能。
+         * 但是如果对于需要即使响应的，小批量数据的应用场景，例如网络游戏就不能采用Negale算法了。默认是false,表示采用Negale算法。
+         */
+    	sock.setTcpNoDelay(true);
+        /**
+         * syncLimit：LF同步通信时限
+                               集群中的follower服务器(F)与leader服务器(L)之间 请求和应答 之间能容忍的最多心跳数（tickTime的数量）。
+                               此配置表示， leader 与 follower 之间发送消息，请求 和 应答 时间长度。如果 follower 在设置的时间内不能与leader进行通信，那么此 follower 将被丢弃
+         */
         sock.setSoTimeout(self.tickTime * self.syncLimit);
     }
 
@@ -527,6 +536,7 @@ public class QuorumCnxManager {
                     ss.setReuseAddress(true);
                     if (self.getQuorumListenOnAllIPs()) {
                         int port = self.quorumPeers.get(self.getId()).electionAddr.getPort();
+                        //InetSocketAddress(int port)：创建IP地址为通配符地址，端口号为port的端口地址。
                         addr = new InetSocketAddress(port);
                     } else {
                         addr = self.quorumPeers.get(self.getId()).electionAddr;
@@ -536,7 +546,7 @@ public class QuorumCnxManager {
                             .toString());
                     ss.bind(addr);
                     while (!shutdown) {
-                        Socket client = ss.accept();
+                        Socket client = ss.accept();//从连接队列中取出一个连接，如果没有则等待
                         setSockOpts(client);
                         LOG.info("Received connection request "
                                 + client.getRemoteSocketAddress());
@@ -547,7 +557,7 @@ public class QuorumCnxManager {
                     LOG.error("Exception while listening", e);
                     numRetries++;
                     try {
-                        ss.close();
+                        ss.close();//与一个客户端通信结束后，要关闭Socket
                         Thread.sleep(1000);
                     } catch (IOException ie) {
                         LOG.error("Error closing server socket", ie);

@@ -31,7 +31,7 @@ import org.apache.zookeeper.txn.TxnHeader;
 
 /**
  * This is the structure that represents a request moving through a chain of
- * RequestProcessors. There are various pieces of information that is tacked
+ * RequestProcessors. There are various pieces of information that is tacked(附加)
  * onto the request as it is processed.
  */
 public class Request {

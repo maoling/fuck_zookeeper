@@ -76,7 +76,7 @@ public class ZooKeeperServerMain {
         } catch (JMException e) {
             LOG.warn("Unable to register log4j JMX control", e);
         }
-        //再次解析配置文件(我也是醉了呀，又解析一遍!!!)
+        //再次解析配置文件(我也是醉了呀，又解析一遍!!!，写这段的人你出来我保证不打你)
         ServerConfig config = new ServerConfig();
         if (args.length == 1) {
             config.parse(args[0]);
@@ -98,7 +98,7 @@ public class ZooKeeperServerMain {
         try {
         	// 逗逼注释
             // Note that this thread isn't going to be doing anything else,
-            // so rather than spawning(?) another thread, we will just call
+            // so rather than spawning(产生) another thread, we will just call
             // run() in this thread.
             // create a file logger url from the command line args
         	/**

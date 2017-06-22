@@ -73,6 +73,7 @@ public class DataTree {
     private static final Logger LOG = LoggerFactory.getLogger(DataTree.class);
 
     /**
+     * 精妙!key为Tree的path,value为DataNode(数据域);用ConcurrentHashMap修饰保证多线程下读写安全
      * This hashtable provides a fast lookup to the datanodes. The tree is the
      * source of truth and is where all the locking occurs
      */

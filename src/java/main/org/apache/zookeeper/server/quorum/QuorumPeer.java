@@ -422,7 +422,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
             }
         }
     }
-
+    //默认刚开始启动的时候ServerState为：LOOKING
     private ServerState state = ServerState.LOOKING;
 
     public synchronized void setPeerState(ServerState newState){
@@ -598,6 +598,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                 throw new RuntimeException(e);
             }
         }
+        //创建选举算法，并在其中：new QuorumCnxManager(this)
         this.electionAlg = createElectionAlgorithm(electionType);
     }
     
@@ -756,6 +757,9 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
         LOG.debug("Starting quorum peer");
         try {
             jmxQuorumBean = new QuorumBean(this);
+            /**
+             * 注册JMX
+             */
             MBeanRegistry.getInstance().register(jmxQuorumBean, null);
             for(QuorumServer s: getView().values()){
                 ZKMBeanInfo p;
@@ -786,6 +790,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
              * Main loop
              */
             while (running) {
+            	//判断当前服务器的状态
                 switch (getPeerState()) {
                 case LOOKING:
                     LOG.info("LOOKING");
@@ -823,6 +828,10 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                         try {
                             roZkMgr.start();
                             setBCVote(null);
+                            /**
+                             * III:leader选举的具体过程在lookForLeader()的实现里面
+                             * @see Election#lookForLeader()
+                             */
                             setCurrentVote(makeLEStrategy().lookForLeader());
                         } catch (Exception e) {
                             LOG.warn("Unexpected exception",e);
@@ -928,6 +937,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
      * ensemble.    
      */
     public Map<Long,QuorumPeer.QuorumServer> getView() {
+    	//unmodifiableMap.put(sameKey,value)会报异常
         return Collections.unmodifiableMap(this.quorumPeers);
     }
     
