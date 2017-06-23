@@ -789,10 +789,13 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
             /*
              * Main loop
              */
+        	
             while (running) {
             	//判断当前服务器的状态
                 switch (getPeerState()) {
                 case LOOKING:
+                	/*只有LOOKING状态才会去执行选举算法。
+                	每个服务器在启动时都会选择自己做为领导，然后将投票信息发送出去，循环一直到选举出领导为止*/
                     LOG.info("LOOKING");
 
                     if (Boolean.getBoolean("readonlymode.enabled")) {
@@ -832,6 +835,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                              * III:leader选举的具体过程在lookForLeader()的实现里面
                              * @see Election#lookForLeader()
                              */
+                            //投票给自己...
                             setCurrentVote(makeLEStrategy().lookForLeader());
                         } catch (Exception e) {
                             LOG.warn("Unexpected exception",e);
