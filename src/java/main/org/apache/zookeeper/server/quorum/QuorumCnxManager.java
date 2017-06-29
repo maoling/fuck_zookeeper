@@ -58,7 +58,7 @@ import org.apache.zookeeper.server.ZooKeeperThread;
  * implementation to maintain messages to send to another peer, we add the
  * message to the tail of the queue, thus changing the order of messages.
  * Although this is not a problem for the leader election, it could be a problem
- * when consolidating peer communication. This is to be verified, though.
+ * when consolidating(使巩固,使加强) peer communication. This is to be verified, though.
  * 
  */
 
@@ -911,6 +911,10 @@ public class QuorumCnxManager {
      */
     public void addToRecvQueue(Message msg) {
         synchronized(recvQLock) {
+        	/*
+             * Maximum capacity of thread queues
+             * static final int RECV_CAPACITY = 100;
+            */           
             if (recvQueue.remainingCapacity() == 0) {
                 try {
                     recvQueue.remove();

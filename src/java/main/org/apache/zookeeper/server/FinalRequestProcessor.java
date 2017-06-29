@@ -83,7 +83,7 @@ public class FinalRequestProcessor implements RequestProcessor {
         this.zks = zks;
     }
     
-    //shit,竟然300多行
+    //shit,竟然有300多行
     public void processRequest(Request request) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Processing request:: " + request);

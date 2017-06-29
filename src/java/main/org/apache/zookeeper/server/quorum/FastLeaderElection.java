@@ -450,9 +450,11 @@ public class FastLeaderElection implements Election {
 	Messenger messenger;
 	/**
 	 * 逻辑时钟
-                     或者叫投票的次数，同一轮投票过程中的逻辑时钟值是相同的。每投完一次票这个数据就会增加，然后与接收到的其它服务器返回的投票信息中的数值相比，根据不同的值做出不同的判断
+                     或者叫投票的次数，同一轮投票过程中的逻辑时钟值是相同的。每投完一次票这个数据就会增加，
+                     然后与接收到的其它服务器返回的投票信息中的数值相比，根据不同的值做出不同的判断
 	 */
 	volatile long logicalclock; /* Election instance */
+	//提案投票的Leader
 	long proposedLeader;
 	long proposedZxid;
 	long proposedEpoch;
@@ -755,9 +757,9 @@ public class FastLeaderElection implements Election {
 
 			int notTimeout = finalizeWait;
 
-			synchronized (this) {
-				//给自己投票
+			synchronized (this) {				
 				logicalclock++;
+				//给自己投票
 				updateProposal(getInitId(), getInitLastLoggedZxid(), getPeerEpoch());
 			}
 
