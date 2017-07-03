@@ -181,6 +181,7 @@ public class QuorumCnxManager {
      * If this server has initiated the connection, then it gives up on the
      * connection if it loses challenge. Otherwise, it keeps the connection.
      */
+    //confusion:如果sid 大于 当前server的sid,则drop掉这个连接；感觉和我理解的逻辑反过来了
     public boolean initiateConnection(Socket sock, Long sid) {
         DataOutputStream dout = null;
         try {
@@ -382,6 +383,7 @@ public class QuorumCnxManager {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Connected to server " + sid);
                 }
+                //III:这个骚气的函数名称
                 initiateConnection(sock, sid);
             } catch (UnresolvedAddressException e) {
                 // Sun doesn't include the address that causes this
@@ -478,7 +480,8 @@ public class QuorumCnxManager {
         /**
          * syncLimit：LF同步通信时限
                                集群中的follower服务器(F)与leader服务器(L)之间 请求和应答 之间能容忍的最多心跳数（tickTime的数量）。
-                               此配置表示， leader 与 follower 之间发送消息，请求 和 应答 时间长度。如果 follower 在设置的时间内不能与leader进行通信，那么此 follower 将被丢弃
+                               此配置表示， leader 与 follower 之间发送消息，请求 和 应答 时间长度。
+                               如果 follower 在设置的时间内不能与leader进行通信，那么此 follower 将被丢弃
          */
         sock.setSoTimeout(self.tickTime * self.syncLimit);
     }
@@ -673,6 +676,10 @@ public class QuorumCnxManager {
         synchronized void send(ByteBuffer b) throws IOException {
             byte[] msgBytes = new byte[b.capacity()];
             try {
+            	/**
+            	 * position：相当于一个游标（cursor），记录我们从哪里开始写数据，从哪里开始读数据。
+            	         位置:下一个要被读或写的元素的索引，每次读写缓冲区数据时都会改变该值，为下次读写作准备
+            	 */
                 b.position(0);
                 b.get(msgBytes);
             } catch (BufferUnderflowException be) {
