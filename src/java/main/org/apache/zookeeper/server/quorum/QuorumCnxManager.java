@@ -622,6 +622,7 @@ public class QuorumCnxManager {
             this.sock = sock;
             recvWorker = null;
             try {
+            	//创建一个数据输出流对象
                 dout = new DataOutputStream(sock.getOutputStream());
             } catch (IOException e) {
                 LOG.error("Unable to access socket output stream", e);
@@ -820,7 +821,18 @@ public class QuorumCnxManager {
                      */
                     byte[] msgArray = new byte[length];
                     din.readFully(msgArray, 0, length);
+                    /**ByteBuffer wrap(byte [] array, int offset, int length) 
+                                                                    把一个byte数组或byte数组的一部分包装成ByteBuffer。**/
                     ByteBuffer message = ByteBuffer.wrap(msgArray);
+                    /**
+                     * NIO提供了多种方法来创建一个与给定缓冲区共享内容的新缓冲区，这些方法对元素的处理过程各有不同。
+                     * 基本上，这种新缓冲区有自己独立的状态变量（position，limit，capacity和mark），
+                     * 但与原始缓冲区共享了同一个后援存储空间。任何对新缓冲区内容的修改都将反映到原始缓冲区上。
+                     * 可以将新缓冲区看作是从另一个角度对同一数据的透视。
+					   duplicate()方法用于创建一个与原始缓冲区共享内容的新缓冲区。
+					         新缓冲区的position，limit，mark和capacity都初始化为原始缓冲区的索引值，
+					         然而，它们的这些值是相互独立的。
+                     */
                     addToRecvQueue(new Message(message.duplicate(), sid));
                 }
             } catch (Exception e) {
