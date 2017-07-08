@@ -196,6 +196,7 @@ public class QuorumCnxManager {
         }
         
         // If lost the challenge, then drop the new connection
+        //1--->2(yes);3---->2(no)
         if (sid > self.getId()) {
             LOG.info("Have smaller server identifier, so dropping the " +
                      "connection: (" + sid + ", " + self.getId() + ")");
@@ -379,11 +380,12 @@ public class QuorumCnxManager {
                 }
                 Socket sock = new Socket();
                 setSockOpts(sock);
+                //好累呀，你终于连接了！
                 sock.connect(self.getView().get(sid).electionAddr, cnxTO);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Connected to server " + sid);
                 }
-                //III:这个骚气的函数名称
+                //III:这个骚气的函数名称.谁取的站出来，我保证不打死你！
                 initiateConnection(sock, sid);
             } catch (UnresolvedAddressException e) {
                 // Sun doesn't include the address that causes this

@@ -764,7 +764,7 @@ public class FastLeaderElection implements Election {
 			}
 
 			LOG.info("New election. My id =  " + self.getId() + ", proposed zxid=0x" + Long.toHexString(proposedZxid));
-			//将ToSendMsg放入sendqueue队列中;将投票信息发送给集群中的每个服务器
+			//将ToSendMsg放入sendqueue队列中;
 			sendNotifications();
 
 			/*
@@ -809,11 +809,11 @@ public class FastLeaderElection implements Election {
 					case LOOKING:
 						// If notification > current, replace and send messages
 						// out
-						// 判断投票是否过时，如果过时就清除之前已经接收到的信息 
+						// 根据Epoch判断投票是否超前,或者过时;或者是当前轮次
 						if (n.electionEpoch > logicalclock) {
 							logicalclock = n.electionEpoch;
 							recvset.clear();
-							//更新投票信息
+							//更新投票信息(如果接受的别的server的Notification的Vote更大,则用其替代当前的Vote)
 							if (totalOrderPredicate(n.leader, n.zxid, n.peerEpoch, getInitId(), getInitLastLoggedZxid(),
 									getPeerEpoch())) {
 								updateProposal(n.leader, n.zxid, n.peerEpoch);
@@ -831,7 +831,7 @@ public class FastLeaderElection implements Election {
 							}
 							break;
 						} else if (totalOrderPredicate(n.leader, n.zxid, n.peerEpoch, proposedLeader, proposedZxid,
-								proposedEpoch)) {
+								proposedEpoch)) {//look at Line 763 for init
 							//更新投票信息
 							updateProposal(n.leader, n.zxid, n.peerEpoch);
 							sendNotifications();
@@ -863,10 +863,12 @@ public class FastLeaderElection implements Election {
 							 * relevant message from the reception queue
 							 */
 							if (n == null) {
+							    //如果提案选举出的LeaderId等于自身sid,当前server角色就是Leader
 								self.setPeerState(
 										(proposedLeader == self.getId()) ? ServerState.LEADING : learningState());
 
 								Vote endVote = new Vote(proposedLeader, proposedZxid, logicalclock, proposedEpoch);
+								//recvqueue.clear();
 								leaveInstance(endVote);
 								return endVote;
 							}

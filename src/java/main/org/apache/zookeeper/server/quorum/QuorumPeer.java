@@ -505,7 +505,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
         startLeaderElection();
         /**
          * 启动本服务器实例线程，调用本地的run()方法
-           @see QuorumPeer.run()
+           @see           QuorumPeer#run()
          */
         super.start();
     }
