@@ -848,8 +848,8 @@ public class FastLeaderElection implements Election {
 						if (termPredicate(recvset,
 								new Vote(proposedLeader, proposedZxid, logicalclock, proposedEpoch))) {
 
-							// Verify if there is any change in the proposed
-							// leader
+							// Verify if there is any change in the proposed leader
+							// 如果 n从recvqueue取出!=null,并且进入Line：856；则重新走Line：775的逻辑
 							while ((n = recvqueue.poll(finalizeWait, TimeUnit.MILLISECONDS)) != null) {
 								if (totalOrderPredicate(n.leader, n.zxid, n.peerEpoch, proposedLeader, proposedZxid,
 										proposedEpoch)) {
