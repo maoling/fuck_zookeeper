@@ -136,7 +136,7 @@ public class QuorumPeerConfig {
             } finally {
                 in.close();
             }
-
+            //真正解析参数的方法
             parseProperties(cfg);
         } catch (IOException e) {
             throw new ConfigException("Error processing " + path, e);

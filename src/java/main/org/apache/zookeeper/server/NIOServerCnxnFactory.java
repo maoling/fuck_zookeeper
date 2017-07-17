@@ -86,14 +86,18 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
          * 此时客户端可以访问zk的2181端口；但是还无法处理客户端的请求
          */
         thread = new ZooKeeperThread(this, "NIOServerCxn.Factory:" + addr);
+        //线程后台运行
         thread.setDaemon(true);
         maxClientCnxns = maxcc;
+        //??
         this.ss = ServerSocketChannel.open();
+        //??
         ss.socket().setReuseAddress(true);
         LOG.info("binding to port " + addr);
         ss.socket().bind(addr);
         //非阻塞
         ss.configureBlocking(false);
+        //??
         ss.register(selector, SelectionKey.OP_ACCEPT);
     }
 
@@ -175,7 +179,7 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
             return s.size();
         }
     }
-    //主逻辑
+    //主逻辑，真正NOI的部分
     public void run() {
         while (!ss.socket().isClosed()) {
             try {
