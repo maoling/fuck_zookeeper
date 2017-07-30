@@ -116,7 +116,7 @@ public class FileTxnSnapLog {
     }
     
     /**
-     * this function restores the server 
+     * this function restores[修复] the server 
      * database after reading from the 
      * snapshots and transaction logs
      * @param dt the datatree to be restored

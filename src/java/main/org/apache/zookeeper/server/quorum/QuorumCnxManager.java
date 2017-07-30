@@ -181,7 +181,6 @@ public class QuorumCnxManager {
      * If this server has initiated the connection, then it gives up on the
      * connection if it loses challenge. Otherwise, it keeps the connection.
      */
-    //confusion:如果sid 大于 当前server的sid,则drop掉这个连接；感觉和我理解的逻辑反过来了
     public boolean initiateConnection(Socket sock, Long sid) {
         DataOutputStream dout = null;
         try {
@@ -196,7 +195,7 @@ public class QuorumCnxManager {
         }
         
         // If lost the challenge, then drop the new connection
-        //1--->2(yes);3---->2(no)
+        // 1--->2(yes);3---->2(no)
         if (sid > self.getId()) {
             LOG.info("Have smaller server identifier, so dropping the " +
                      "connection: (" + sid + ", " + self.getId() + ")");
@@ -278,6 +277,7 @@ public class QuorumCnxManager {
         }
         
         //If wins the challenge, then close the new connection.
+        //如果当前服务器发现自己的sid更大,或断开连接，然后主动和远程机器建立连接
         if (sid < self.getId()) {
             /*
              * This replica might still believe that the connection to sid is
@@ -297,6 +297,7 @@ public class QuorumCnxManager {
             connectOne(sid);
 
             // Otherwise start worker threads to receive data.
+            //如果发现远程服务器的sid更大，则开始接收数据
         } else {
             SendWorker sw = new SendWorker(sock, sid);
             RecvWorker rw = new RecvWorker(sock, sid, sw);
