@@ -40,6 +40,7 @@ import java.net.InetSocketAddress;
  * * A HostProvider that prefers nearby hosts.
  */
 public interface HostProvider {
+	//返回当前服务器地址列表的个数
     public int size();
 
     /**
@@ -50,6 +51,7 @@ public interface HostProvider {
      * @param spinDelay
      *            Milliseconds to wait if all hosts have been tried once.
      */
+    //返回一个服务器地址InetSocketAddress，以便客户端与服务器进行连接
     public InetSocketAddress next(long spinDelay);
 
     /**
@@ -57,5 +59,6 @@ public interface HostProvider {
      * 
      * The HostProvider may use this notification to reset it's inner state.
      */
+    //这是一个回调函数，如果客户端与服务器建立连接，就通过此方法来通知到HostProvider
     public void onConnected();
 }
