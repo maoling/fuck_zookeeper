@@ -30,8 +30,15 @@ import org.apache.zookeeper.common.PathUtils;
  * 
  * The chrootPath member should be replaced by a Path object in issue
  * ZOOKEEPER-849.
+ * chrootPath实现多个应用相互隔离；比如创建节点/test_chroot;其实是创建了一个相对路径；绝对路径为：
+ * /apps/X/test_chroot [ZOOKEEPER-849]
  * 
  * @see org.apache.zookeeper.ZooKeeper
+ */
+
+/**
+ 1.解析chrootPath
+ 2.保存服务器地址列表
  */
 public final class ConnectStringParser {
     private static final int DEFAULT_PORT = 2181;
@@ -45,6 +52,7 @@ public final class ConnectStringParser {
      * @throws IllegalArgumentException
      *             for an invalid chroot path.
      */
+    //192.168.0.1:2181,192.168.0.1:2181,192.168.0.1:2181/apps/X
     public ConnectStringParser(String connectString) {
         // parse out chroot, if any
         int off = connectString.indexOf('/');
