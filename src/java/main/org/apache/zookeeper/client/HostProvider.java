@@ -40,7 +40,7 @@ import java.net.InetSocketAddress;
  * * A HostProvider that prefers nearby hosts.
  */
 public interface HostProvider {
-	//·µ»Øµ±Ç°·şÎñÆ÷µØÖ·ÁĞ±íµÄ¸öÊı
+	//è¿”å›å½“å‰æœåŠ¡å™¨åœ°å€åˆ—è¡¨çš„ä¸ªæ•°
     public int size();
 
     /**
@@ -51,7 +51,7 @@ public interface HostProvider {
      * @param spinDelay
      *            Milliseconds to wait if all hosts have been tried once.
      */
-    //·µ»ØÒ»¸ö·şÎñÆ÷µØÖ·InetSocketAddress£¬ÒÔ±ã¿Í»§¶ËÓë·şÎñÆ÷½øĞĞÁ¬½Ó
+    //è¿”å›ä¸€ä¸ªæœåŠ¡å™¨åœ°å€InetSocketAddressï¼Œä»¥ä¾¿å®¢æˆ·ç«¯ä¸æœåŠ¡å™¨è¿›è¡Œè¿æ¥
     public InetSocketAddress next(long spinDelay);
 
     /**
@@ -59,6 +59,6 @@ public interface HostProvider {
      * 
      * The HostProvider may use this notification to reset it's inner state.
      */
-    //ÕâÊÇÒ»¸ö»Øµ÷º¯Êı£¬Èç¹û¿Í»§¶ËÓë·şÎñÆ÷½¨Á¢Á¬½Ó£¬¾ÍÍ¨¹ı´Ë·½·¨À´Í¨Öªµ½HostProvider
+    //è¿™æ˜¯ä¸€ä¸ªå›è°ƒå‡½æ•°ï¼Œå¦‚æœå®¢æˆ·ç«¯ä¸æœåŠ¡å™¨å»ºç«‹è¿æ¥ï¼Œå°±é€šè¿‡æ­¤æ–¹æ³•æ¥é€šçŸ¥åˆ°HostProvider
     public void onConnected();
 }

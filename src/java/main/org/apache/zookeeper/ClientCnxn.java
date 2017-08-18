@@ -87,6 +87,8 @@ import org.slf4j.LoggerFactory;
  * connected to as needed.
  *
  */
+//客户端核心线程，包含两个线程，即SendThread(I/O线程;负责zk客户端与服务器之间的I/O通信)
+//和EventThread(事件线程,主要负责对服务器事件进行处理)
 public class ClientCnxn {
     private static final Logger LOG = LoggerFactory.getLogger(ClientCnxn.class);
 

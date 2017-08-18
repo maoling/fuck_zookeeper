@@ -83,6 +83,7 @@ import java.util.*;
  * EventNone and state sKeeperStateDisconnected.
  *
  */
+//客户端的入口
 public class ZooKeeper {
 
     public static final String ZOOKEEPER_CLIENT_CNXN_SOCKET = "zookeeper.clientCnxnSocket";
@@ -583,6 +584,7 @@ public class ZooKeeper {
 
         ConnectStringParser connectStringParser = new ConnectStringParser(
                 connectString);
+        //初始化StaticHostProvider,并且打乱服务器地址列表的顺序
         HostProvider hostProvider = new StaticHostProvider(
                 connectStringParser.getServerAddresses());
         cnxn = new ClientCnxn(connectStringParser.getChrootPath(),

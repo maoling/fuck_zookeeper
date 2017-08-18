@@ -40,9 +40,9 @@ public final class StaticHostProvider implements HostProvider {
 
     private final List<InetSocketAddress> serverAddresses = new ArrayList<InetSocketAddress>(
             5);
-
+    //表示当前正在使用的那个服务器的位置@see onConnected()
     private int lastIndex = -1;
-
+    //表示循环队列当前遍历到的那个位置
     private int currentIndex = -1;
 
     /**
@@ -63,7 +63,7 @@ public final class StaticHostProvider implements HostProvider {
             for (InetAddress resolvedAddress : resolvedAddresses) {
                 // If hostName is null but the address is not, we can tell that
                 // the hostName is an literal IP address. Then we can set the host string as the hostname
-                // safely to avoid reverse DNS lookup.
+                // safely to avoid reverse DNS lookup(???).
                 // As far as i know, the only way to check if the hostName is null is use toString().
                 // Both the two implementations of InetAddress are final class, so we can trust the return value of
                 // the toString() method.
@@ -84,7 +84,7 @@ public final class StaticHostProvider implements HostProvider {
             throw new IllegalArgumentException(
                     "A HostProvider may not be empty!");
         }
-        Collections.shuffle(this.serverAddresses);
+        Collections.shuffle(this.serverAddresses);	
     }
 
     public int size() {
@@ -93,9 +93,11 @@ public final class StaticHostProvider implements HostProvider {
 
     public InetSocketAddress next(long spinDelay) {
         ++currentIndex;
+        //当游标超过serverAddresses列表的长度，重置为0
         if (currentIndex == serverAddresses.size()) {
             currentIndex = 0;
         }
+        //当服务器地址列表比较少的情况下，当发现currentIndex == lastIndex时，则等待spinDelay毫秒再去获取
         if (currentIndex == lastIndex && spinDelay > 0) {
             try {
                 Thread.sleep(spinDelay);
