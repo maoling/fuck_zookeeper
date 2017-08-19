@@ -25,6 +25,7 @@ import java.io.IOException;
  * 
  */
 public interface Record {
+	//Record serialize to (----->archive)
     public void serialize(OutputArchive archive, String tag)
         throws IOException;
     public void deserialize(InputArchive archive, String tag)

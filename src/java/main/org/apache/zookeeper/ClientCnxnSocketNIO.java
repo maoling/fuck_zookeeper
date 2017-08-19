@@ -53,6 +53,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
         return sockKey != null;
     }
     
+    //核心逻辑:doIO
     /**
      * @return true if a packet was received
      * @throws InterruptedException
@@ -91,6 +92,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
                     updateLastHeard();
                     initialized = true;
                 } else {
+                	//III：
                     sendThread.readResponse(incomingBuffer);
                     lenBuffer.clear();
                     incomingBuffer = lenBuffer;

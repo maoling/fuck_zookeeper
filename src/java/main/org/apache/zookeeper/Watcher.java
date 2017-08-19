@@ -32,6 +32,7 @@ public interface Watcher {
      * This interface defines the possible states an Event may represent
      */
     public interface Event {
+    	//通知状态
         /**
          * Enumeration of states the ZooKeeper may be at the event
          */
@@ -55,7 +56,7 @@ public interface Watcher {
             SyncConnected (3),
 
             /**
-             * Auth failed state
+             * Auth failed state（并不是简单指当前客户端会话没有权限，而是指授权失败）
              */
             AuthFailed (4),
 
@@ -108,7 +109,8 @@ public interface Watcher {
                 }
             }
         }
-
+        
+        //事件类型
         /**
          * Enumeration of types of events that may occur on the ZooKeeper
          */
@@ -116,7 +118,16 @@ public interface Watcher {
             None (-1),
             NodeCreated (1),
             NodeDeleted (2),
+            /**
+             * 此处的变更包括节点的数据内容和数据的版本号dataVersion.
+                                      即使用相同数据内容来更新，还是会触发这个事件通知；因为一旦客户端调用数据更新的接口，
+                                      且更新成功，就会更新dataVersion值
+             */
             NodeDataChanged (3),
+            /**
+             * 子节点列表变化特指子节点个数或者组成情况的变化（新增，或删除子节点）；
+             * 而子节点内容的变化是不会触发这个事件的
+             */
             NodeChildrenChanged (4);
 
             private final int intValue;     // Integer representation of value
@@ -144,6 +155,6 @@ public interface Watcher {
             }           
         }
     }
-
+    //III:ZK服务器会给客户端发送一个Watch事件通知，客户端就会对相应的process()方法进行回调，从而实现对事件的处理
     abstract public void process(WatchedEvent event);
 }

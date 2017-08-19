@@ -32,6 +32,11 @@ import org.apache.zookeeper.server.ByteBufferInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+//ClientCnxn连接器的底层I/O处理器
+/**
+*为了便于对底层Socket进行抽象，扩展(例如使用Netty来实现);since3.4.0开始单独抽出来
+*-Dzookeeper.clientCnxnSocket=org.apache.zookeeper.ClientCnxnSocketNIO
+*/
 /**
  * A ClientCnxnSocket does the lower level communication with a socket
  * implementation.

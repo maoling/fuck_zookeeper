@@ -87,7 +87,7 @@ import org.slf4j.LoggerFactory;
  * connected to as needed.
  *
  */
-//客户端核心线程，包含两个线程，即SendThread(I/O线程;负责zk客户端与服务器之间的I/O通信)
+//zookeeper客户端核心线程，包含两个线程，即SendThread(I/O线程;负责zk客户端与服务器之间的I/O通信)
 //和EventThread(事件线程,主要负责对服务器事件进行处理)
 public class ClientCnxn {
     private static final Logger LOG = LoggerFactory.getLogger(ClientCnxn.class);
@@ -137,11 +137,13 @@ public class ClientCnxn {
     /**
      * These are the packets that have been sent and are waiting for a response.
      */
+    //服务器响应的等待队列;(存储那些已经从客户端发送到服务器，但是需要等待服务器端响应的Packet集合)
     private final LinkedList<Packet> pendingQueue = new LinkedList<Packet>();
 
     /**
      * These are the packets that need to be sent.
      */
+    //客户端请求发送队列
     private final LinkedList<Packet> outgoingQueue = new LinkedList<Packet>();
 
     private int connectTimeout;
@@ -248,8 +250,9 @@ public class ClientCnxn {
      * This class allows us to pass the headers and the relevant records around.
      */
     static class Packet {
+    	//请求头
         RequestHeader requestHeader;
-
+        //响应头
         ReplyHeader replyHeader;
 
         Record request;
@@ -257,7 +260,7 @@ public class ClientCnxn {
         Record response;
 
         ByteBuffer bb;
-
+        //节点路径(不同的视图)
         /** Client's view of the path (may differ due to chroot) **/
         String clientPath;
         /** Servers's view of the path (may differ due to chroot) **/
@@ -268,7 +271,7 @@ public class ClientCnxn {
         AsyncCallback cb;
 
         Object ctx;
-
+        //注册的Watch信息
         WatchRegistration watchRegistration;
 
         public boolean readOnly;
@@ -293,6 +296,8 @@ public class ClientCnxn {
             this.watchRegistration = watchRegistration;
         }
 
+        //create ByteBuffer(只会将requestHeader,request和readOnly三个属性进行序列化；
+        //其他属性保存在客户端的上下文中，不会与服务器进行网络传输)
         public void createBB() {
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -446,7 +451,12 @@ public class ClientCnxn {
         return name + suffix;
     }
 
+    /**
+                负责客户端事件处理，并触发客户端注册的Watcher监听;EventThread会不断地从waitingEvents这个队列取出Object,
+                识别其具体类型(Watcher或者AsyncCallback);并且调用process和processResult接口对事件触发和回调
+     */
     class EventThread extends ZooKeeperThread {
+    	//用于存放所有等待被客户端处理的事件
         private final LinkedBlockingQueue<Object> waitingEvents =
             new LinkedBlockingQueue<Object>();
 
@@ -642,6 +652,7 @@ public class ClientCnxn {
        }
     }
 
+    //在finishPacket()方法中处理Watcher注册等逻辑
     private void finishPacket(Packet p) {
         if (p.watchRegistration != null) {
             p.watchRegistration.register(p.replyHeader.getErr());
@@ -720,7 +731,11 @@ public class ClientCnxn {
     
     public static final int packetLen = Integer.getInteger("jute.maxbuffer",
             4096 * 1024);
-
+     
+    // SendThread一方面维护客户端与服务器之间的会话生命周期，其通过在一定的周期频率内向服务器发送PING包来心跳检测
+    // 同时在会话周期内，如果客户端与服务器之间出现TCP连接断开的情况，那么就会自动且透明地完成重练操作
+    // 另一方面其将上层客户端API操作转换成相应的请求协议并发送到服务器端，并完成同步，异步回调
+    // 其还负责将来自服务器端的事件传递给EventThread
     /**
      * This class services the outgoing request queue and generates the heart
      * beats. It also spawns the ReadThread.
@@ -794,7 +809,8 @@ public class ClientCnxn {
                 eventThread.queueEvent( we );
                 return;
             }
-
+            // 如果检测到客户端与服务器之间正在处理SASL权限的话，那么那些不含请求头(requestHeader)的Packet(例如绘画创建请求)是可以被发送的，
+            // 其余的都无法被发送
             // If SASL authentication is currently in progress, construct and
             // send a response packet immediately, rather than queuing a
             // response as with other packets.
@@ -1384,7 +1400,7 @@ public class ClientCnxn {
             disconnect();
         }
     }
-
+    //客户端请求序列XID(type??)
     private int xid = 1;
 
     private volatile States state = States.NOT_CONNECTED;
