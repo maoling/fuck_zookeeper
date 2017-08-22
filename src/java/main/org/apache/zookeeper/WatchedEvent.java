@@ -22,14 +22,24 @@ import org.apache.zookeeper.Watcher.Event.EventType;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
 
 /**
+ * zk使用WatchedEvent来封装服务器端事件并传递给Watcher,从而方便回调方法process对服务端事件进行处理
+       当/zk-book节点发生变化,客户端只能收到如下信息：
+   keeperState:	SyncConnected  
+   EventType:NodeDataChanged
+   Path:/zk-book
+ */
+/**
  *  A WatchedEvent represents a change on the ZooKeeper that a Watcher
  *  is able to respond to.  The WatchedEvent includes exactly what happened,
  *  the current state of the ZooKeeper, and the path of the znode that
  *  was involved in the event.
  */
 public class WatchedEvent {
+	//通知状态
     final private KeeperState keeperState;
+    //事件类型
     final private EventType eventType;
+    //节点路径
     private String path;
     
     /**
@@ -68,6 +78,10 @@ public class WatchedEvent {
             + " type:" + eventType + " path:" + path;
     }
 
+    /**
+     * 服务端在生成WatchedEvent之后调用getWrapper()将自己包装成可序列化的WatcherEvent事件，便于网络传输
+                 而后客户端再将WatcherEvent事件还原成WatchedEvent事件
+     */
     /**
      *  Convert WatchedEvent to type that can be sent over network
      */
