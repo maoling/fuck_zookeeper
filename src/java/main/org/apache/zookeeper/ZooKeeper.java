@@ -99,7 +99,7 @@ public class ZooKeeper {
     public ZooKeeperSaslClient getSaslClient() {
         return cnxn.zooKeeperSaslClient;
     }
-
+    //ZKWatchManager
     private final ZKWatchManager watchManager = new ZKWatchManager();
 
     List<String> getDataWatches() {
@@ -233,6 +233,7 @@ public class ZooKeeper {
     /**
      * Register a watcher for a particular path.
      */
+    //客户端会将Watcher暂时封装在WatchRegistration中
     abstract class WatchRegistration {
         private Watcher watcher;
         private String clientPath;
@@ -241,7 +242,7 @@ public class ZooKeeper {
             this.watcher = watcher;
             this.clientPath = clientPath;
         }
-
+        
         abstract protected Map<String, Set<Watcher>> getWatches(int rc);
 
         /**
@@ -251,6 +252,7 @@ public class ZooKeeper {
          */
         public void register(int rc) {
             if (shouldAddWatch(rc)) {
+            	//getWatches---->zkWatchManager.dataWatches视图;
                 Map<String, Set<Watcher>> watches = getWatches(rc);
                 synchronized(watches) {
                     Set<Watcher> watchers = watches.get(clientPath);
@@ -258,6 +260,7 @@ public class ZooKeeper {
                         watchers = new HashSet<Watcher>();
                         watches.put(clientPath, watchers);
                     }
+                    //watcher通过构造函数的方式传递
                     watchers.add(watcher);
                 }
             }
@@ -378,6 +381,7 @@ public class ZooKeeper {
     public ZooKeeper(String connectString, int sessionTimeout, Watcher watcher)
         throws IOException
     {
+    	//watcher作为整个zk会话期间的默认watcher,会一直保存在客户端ZKWatchManager的defaultWatcher
         this(connectString, sessionTimeout, watcher, false);
     }
 
@@ -1198,6 +1202,7 @@ public class ZooKeeper {
         // the watch contains the un-chroot path
         WatchRegistration wcb = null;
         if (watcher != null) {
+        	//注册watcher到中
             wcb = new DataWatchRegistration(watcher, clientPath);
         }
 
@@ -1209,6 +1214,7 @@ public class ZooKeeper {
         request.setPath(serverPath);
         request.setWatch(watcher != null);
         GetDataResponse response = new GetDataResponse();
+        //III:
         ReplyHeader r = cnxn.submitRequest(h, request, response, wcb);
         if (r.getErr() != 0) {
             throw KeeperException.create(KeeperException.Code.get(r.getErr()),
@@ -1232,12 +1238,13 @@ public class ZooKeeper {
      * if no node with the given path exists.
      *
      * @param path the given path
-     * @param watch whether need to watch this node
+     * @param watch whether need to watch this node//是否使用上文构造函数中默认的Watch
      * @param stat the stat of the node
      * @return the data of the node
      * @throws KeeperException If the server signals an error with a non-zero error code
      * @throws InterruptedException If the server transaction is interrupted.
      */
+    //另外zk还可以getData,getChildren,exist三个接口向服务器端注册Watcher,无论哪种方式实现原理相同
     public byte[] getData(String path, boolean watch, Stat stat)
             throws KeeperException, InterruptedException {
         return getData(path, watch ? watchManager.defaultWatcher : null, stat);

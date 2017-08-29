@@ -655,6 +655,7 @@ public class ClientCnxn {
     //在finishPacket()方法中处理Watcher注册等逻辑
     private void finishPacket(Packet p) {
         if (p.watchRegistration != null) {
+        	//从Packet取出对应的Watcher,并且注册到对应的ZkWatcherManager中
             p.watchRegistration.register(p.replyHeader.getErr());
         }
 
@@ -745,7 +746,8 @@ public class ClientCnxn {
         private final ClientCnxnSocket clientCnxnSocket;
         private Random r = new Random(System.nanoTime());        
         private boolean isFirstConnect = true;
-
+        
+        //再由客户端的SendThread线程的readResponse方法负责接收来自服务器的响应
         void readResponse(ByteBuffer incomingBuffer) throws IOException {
             ByteBufferInputStream bbis = new ByteBufferInputStream(
                     incomingBuffer);
@@ -777,6 +779,7 @@ public class ClientCnxn {
                 }
                 return;
             }
+            //处理WatchedEvent事件
             if (replyHdr.getXid() == -1) {
                 // -1 means notification
                 if (LOG.isDebugEnabled()) {
@@ -784,6 +787,7 @@ public class ClientCnxn {
                         + Long.toHexString(sessionId));
                 }
                 WatcherEvent event = new WatcherEvent();
+                //反序列化
                 event.deserialize(bbia, "response");
 
                 // convert from a server path to a client path
@@ -799,7 +803,7 @@ public class ClientCnxn {
                     			+ chrootPath);
                     }
                 }
-
+                //将WatcherEvent变成WatchedEvent
                 WatchedEvent we = new WatchedEvent(event);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Got " + we + " for sessionid 0x"
@@ -809,7 +813,7 @@ public class ClientCnxn {
                 eventThread.queueEvent( we );
                 return;
             }
-            // 如果检测到客户端与服务器之间正在处理SASL权限的话，那么那些不含请求头(requestHeader)的Packet(例如绘画创建请求)是可以被发送的，
+            // 如果检测到客户端与服务器之间正在处理SASL权限的话，那么那些不含请求头(requestHeader)的Packet(例如会话创建请求)是可以被发送的，
             // 其余的都无法被发送
             // If SASL authentication is currently in progress, construct and
             // send a response packet immediately, rather than queuing a
@@ -1417,6 +1421,7 @@ public class ClientCnxn {
             Record response, WatchRegistration watchRegistration)
             throws InterruptedException {
         ReplyHeader r = new ReplyHeader();
+        //客户端和服务器之间进行网络传输的最小通信单位
         Packet packet = queuePacket(h, r, request, response, null, null, null,
                     null, watchRegistration);
         synchronized (packet) {
@@ -1471,6 +1476,8 @@ public class ClientCnxn {
                 if (h.getType() == OpCode.closeSession) {
                     closing = true;
                 }
+                //放入发送队列中，等待客户端发送
+                //Line1159:SendThread.run clientCnxnSocket.doTransport
                 outgoingQueue.add(packet);
             }
         }
