@@ -20,20 +20,20 @@ public class ZOOKEEPER_2840 {
 		ExecutorService exec = Executors.newFixedThreadPool(clientThreadNum);	
 		
 		LinkedList<InetSocketAddress> inetSocketAddressesList = new LinkedList<>();
-        inetSocketAddressesList.add(new InetSocketAddress(0));
-        inetSocketAddressesList.add(new InetSocketAddress(1));
+                inetSocketAddressesList.add(new InetSocketAddress(0));
+                inetSocketAddressesList.add(new InetSocketAddress(1));
 		for(int i = 0;i<clientThreadNum;i++) {
 			exec.execute(new Job(inetSocketAddressesList));
 		}						
 		exec.shutdown();
-    }
+        }
 
 	static class Job implements Runnable {
 		LinkedList<InetSocketAddress> inetSocketAddressesList;
 	    
-        public Job(LinkedList<InetSocketAddress> inetSocketAddressesList) {
-        	this.inetSocketAddressesList = inetSocketAddressesList;
-        }
+                public Job(LinkedList<InetSocketAddress> inetSocketAddressesList) {
+        	    this.inetSocketAddressesList = inetSocketAddressesList;
+                }
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
@@ -47,24 +47,23 @@ public class ZOOKEEPER_2840 {
 		}
 
 		private void internalShuffleMillis(LinkedList<InetSocketAddress> inetSocketAddressesList) throws Exception {
-	        int hashCode = new StaticHostProvider(inetSocketAddressesList).hashCode();
-	        System.out.println(hashCode);	        
-	        Random r;
-	        
-        	long currentTime = System.currentTimeMillis();
-            r = new Random(currentTime ^ hashCode);
-            synchronized (Job.class) {
-            	System.out.print(String.format("currentMillisTime: %s, currentMillisTime ^ hashCode: %s,r:%s, Result: ",
-                        currentTime, currentTime ^ hashCode, r.nextInt()));
-                Collections.shuffle(inetSocketAddressesList, r);
-                for (int i = 0; i < inetSocketAddressesList.size(); i++) {
-                    System.out.print(String.format("%s ", inetSocketAddressesList.get(i).getPort()));
-                }   
-                if (inetSocketAddressesList.get(0).getPort() == 0) index.incrementAndGet();             
-                System.out.println();
-                System.out.println("the count of connecting to 0 is: " + index + "\ttotal client count is :" + clientThreadNum); 	        
-			}
-            
+			int hashCode = new StaticHostProvider(inetSocketAddressesList).hashCode();
+			System.out.println(hashCode);	        
+			Random r;
+
+			long currentTime = System.currentTimeMillis();
+			r = new Random(currentTime ^ hashCode);
+			synchronized (Job.class) {
+				System.out.print(String.format("currentMillisTime: %s, currentMillisTime ^ hashCode: %s,r:%s, Result: ",
+					currentTime, currentTime ^ hashCode, r.nextInt()));
+				Collections.shuffle(inetSocketAddressesList, r);
+				for (int i = 0; i < inetSocketAddressesList.size(); i++) {
+				    System.out.print(String.format("%s ", inetSocketAddressesList.get(i).getPort()));
+				}   
+				if (inetSocketAddressesList.get(0).getPort() == 0) index.incrementAndGet();             
+				System.out.println();
+				System.out.println("the count of connecting to 0 is: " + index + "\ttotal client count is :" + clientThreadNum); 	        
+			}      
 	    }		
 	}
 	
