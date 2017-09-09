@@ -421,6 +421,8 @@ public class PrepRequestProcessor extends ZooKeeperCriticalThread implements
                 if (version != -1 && version != currentVersion) {
                     throw new KeeperException.BadVersionException(path);
                 }
+                //对比当前请求version和服务器nodeRecord的version.如果version为-1，
+                //表示客户端不需要使用乐观锁；若两个版本不一致则抛出异常
                 version = currentVersion + 1;
                 request.txn = new SetDataTxn(path, setDataRequest.getData(), version);
                 nodeRecord = nodeRecord.duplicate(request.hdr.getZxid());
