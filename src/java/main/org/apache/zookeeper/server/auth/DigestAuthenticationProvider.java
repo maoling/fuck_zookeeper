@@ -132,7 +132,8 @@ public class DigestAuthenticationProvider implements AuthenticationProvider {
      * @throws NoSuchAlgorithmException
      */
     public static void main(String args[]) throws NoSuchAlgorithmException {
-        for (int i = 0; i < args.length; i++) {
+        System.out.println(DigestAuthenticationProvider.generateDigest("foo:fuckme"));
+    	for (int i = 0; i < args.length; i++) {
             System.out.println(args[i] + "->" + generateDigest(args[i]));
         }
     }
